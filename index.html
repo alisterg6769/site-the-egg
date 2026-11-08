@@ -68,6 +68,10 @@ button,input{font:inherit; color:inherit}
 .cship{font-size:.82rem; color:var(--good); font-weight:500}
 
 /* produto */
+.product-tabs{display:flex;gap:8px;position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);margin-top:8px}
+.tab{flex:1;border:0;border-bottom:3px solid transparent;background:transparent;padding:12px 8px;font-weight:700;cursor:pointer;color:var(--muted)}
+.tab.active{color:var(--fg);border-bottom-color:var(--brand)}
+.tab-panel{min-height:1px}
 .back{display:inline-block; margin-top:18px; font-size:.9rem; font-weight:600; color:var(--accent); text-decoration:none}
 .back:hover{text-decoration:underline}
 .layout{display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:32px; padding-block:18px 28px}
@@ -219,7 +223,7 @@ footer{margin-top:22px; color:var(--muted); font-size:.82rem}
         photoCozidos
       ],
       variants:[
-        {name:'1 unidade', sub:'1 ovo', price:2.0, old:22.90, kg:0.1, stock:500, size:'18 × 10 × 6 cm'},
+        {name:'1 ovo', sub:'Venda por unidade', price:1.79, old:22.90/12, kg:0.06, stock:240, size:'12 × 8 × 4 cm', unitName:'unidade', unitPlural:'unidades'},
         {name:'12 ovos', sub:'1 dúzia', price:17.90, old:22.90, kg:1.1, stock:120, size:'30 × 20 × 8 cm'},
         {name:'20 ovos', sub:'bandeja grande', price:29.90, old:37.90, kg:1.7, stock:64, size:'32 × 24 × 8 cm'},
         {name:'30 ovos', sub:'cartela completa', price:42.90, old:54.90, kg:2.4, stock:9, size:'34 × 28 × 9 cm'}
@@ -255,7 +259,7 @@ footer{margin-top:22px; color:var(--muted); font-size:.82rem}
         photoCozidos
       ],
       variants:[
-        {name:'1 unidade', sub:'1 ovo', price:2.0, old:22.90, kg:0.1, stock:500, size:'18 × 10 × 6 cm'},
+        {name:'1 ovo', sub:'Venda por unidade', price:1.59, old:20.90/12, kg:0.06, stock:300, size:'12 × 8 × 4 cm', unitName:'unidade', unitPlural:'unidades'},
         {name:'12 ovos', sub:'1 dúzia', price:15.90, old:20.90, kg:1.1, stock:150, size:'30 × 20 × 8 cm'},
         {name:'20 ovos', sub:'bandeja grande', price:26.90, old:34.90, kg:1.7, stock:80, size:'32 × 24 × 8 cm'},
         {name:'30 ovos', sub:'cartela completa', price:37.90, old:49.90, kg:2.4, stock:12, size:'34 × 28 × 9 cm'}
@@ -269,7 +273,7 @@ footer{margin-top:22px; color:var(--muted); font-size:.82rem}
     p.origin='Campinas, SP'; p.postDays=[1,2,3,4]; p.postLabel='segunda a quinta';
     p.regions=regSudeste; p.unserved=unserved; p.shipNote=shipNote; p.policies=policies;
     p.shipHint='Entrega em 1 a 6 dias úteis · Sul e Sudeste'; p.trackStep='Loja separa os ovos';
-    p.variantLabel='Bandeja'; p.qtyLabel='Quantidade de bandejas'; p.unit=['bandeja','bandejas']; p.maxQ=10;
+    p.variantLabel='Tipo de compra'; p.qtyLabel='Quantidade'; p.unit=['bandeja','bandejas']; p.maxQ=10;
   });
 
   // datas (domingo não conta como dia útil)
@@ -332,7 +336,7 @@ footer{margin-top:22px; color:var(--muted); font-size:.82rem}
 
     app.innerHTML =
       '<a class="back" href="#inicio">← Todos os ovos</a>'+
-      '<div class="layout"><div>'+
+      '<div class="tab-panel active" id="panel-produto"><div class="layout"><div>'+
         '<div class="stage"><img id="mainImg" src="" alt=""><span class="cap" id="cap"></span></div>'+
         '<div class="thumbs" id="thumbs" role="group" aria-label="Fotos do produto"></div></div>'+
       '<div class="buy">'+
@@ -349,6 +353,11 @@ footer{margin-top:22px; color:var(--muted); font-size:.82rem}
         '<div class="status" id="status" role="status"></div>'+
       '</div></div>'+
 
+      '</div><nav class="product-tabs" aria-label="Informações do produto">'+
+        '<button type="button" class="tab active" data-tab="produto" aria-selected="true">Produto</button>'+
+        '<button type="button" class="tab" data-tab="envio" aria-selected="false">Envio</button>'+
+        '<button type="button" class="tab" data-tab="detalhes" aria-selected="false">Detalhes</button></nav>'+
+      '<div class="tab-panel" id="panel-envio" hidden>'+
       '<section class="block"><div class="sec-head"><h2>Envio</h2><p>Prazo contado em dias úteis a partir da postagem.</p></div>'+
         '<div class="ship-grid"><div><div class="origin">'+shipRows+'</div><div class="shipnote">'+p.shipNote+'</div></div>'+
         '<div><label class="label" for="cep">Calcule o frete para o seu CEP</label>'+
@@ -359,9 +368,20 @@ footer{margin-top:22px; color:var(--muted); font-size:.82rem}
         '<div class="code mono"><span class="label" style="letter-spacing:.06em">Código de exemplo</span> BR 5503 9921 47 SP</div>'+
         '<ol class="track" id="track"></ol><p class="note" id="trackNote"></p></section>'+
 
+      '</div><div class="tab-panel" id="panel-detalhes" hidden>'+
       '<section class="block"><div class="sec-head"><h2>Detalhes do produto</h2></div>'+
         '<div class="cols"><div class="desc">'+descs+'<ul>'+bullets+'</ul></div><div class="tablewrap"><table>'+spec+'</table></div></div>'+
-        '<div class="policies">'+pols+'</div></section>';
+        '<div class="policies">'+pols+'</div></section></div>';
+
+    document.querySelectorAll('.product-tabs .tab').forEach(function(tab){
+      tab.addEventListener('click', function(){
+        document.querySelectorAll('.product-tabs .tab').forEach(function(t){
+          var active = t===tab; t.classList.toggle('active',active); t.setAttribute('aria-selected',String(active));
+        });
+        document.querySelectorAll('.tab-panel').forEach(function(panel){ panel.hidden = panel.id !== 'panel-'+tab.dataset.tab; });
+        window.scrollTo({top:document.querySelector('.product-tabs').offsetTop-8,behavior:'smooth'});
+      });
+    });
 
     var maxQty = function(){ return Math.min(p.maxQ, p.variants[cur].stock); };
 
@@ -399,15 +419,15 @@ footer{margin-top:22px; color:var(--muted); font-size:.82rem}
       $('priceOff').textContent = '-'+off+'%';
       $('inst').textContent = 'ou 2x de '+brl(v.price/2)+' sem juros';
       $('qty').textContent = qty;
-      var s = v.stock;
-      $('stock').textContent = s<=10 ? 'Restam só '+s+' '+(s===1?p.unit[0]:p.unit[1]) : s+' '+p.unit[1]+' disponíveis · máximo de '+p.maxQ+' por pedido';
+      var s = v.stock, unitOne = v.unitName || p.unit[0], unitMany = v.unitPlural || p.unit[1];
+      $('stock').textContent = s<=10 ? 'Restam só '+s+' '+(s===1?unitOne:unitMany) : s+' '+unitMany+' disponíveis · máximo de '+p.maxQ+' por pedido';
       $('minus').disabled = qty<=1; $('plus').disabled = qty>=maxQty();
       $('pack').textContent = v.size+' · '+kgTxt(v.kg)+' cada';
       if(sub >= FREE_FROM){
         $('freeHint').textContent = 'Subtotal de '+brl(sub)+'. Esta compra tem frete grátis no envio padrão.';
       } else {
         var miss = FREE_FROM - sub, more = Math.ceil(miss / v.price);
-        $('freeHint').textContent = 'Subtotal de '+brl(sub)+'. Faltam '+brl(miss)+' para o frete grátis, ou seja, mais '+more+' '+(more===1?p.unit[0]:p.unit[1])+'.';
+        $('freeHint').textContent = 'Subtotal de '+brl(sub)+'. Faltam '+brl(miss)+' para o frete grátis, ou seja, mais '+more+' '+(more===1?(v.unitName||p.unit[0]):(v.unitPlural||p.unit[1]))+'.';
       }
       renderShip();
     }
