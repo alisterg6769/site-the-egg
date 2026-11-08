@@ -67,7 +67,7 @@ button,input{font:inherit; color:inherit}
 .cprice small{font-family:var(--f-body); font-weight:400; font-size:.78rem; color:var(--muted); margin-right:6px}
 .cship{font-size:.82rem; color:var(--good); font-weight:500}
 
-/* produto e navegação */
+/* produto */
 .product-tabs{display:flex;gap:8px;position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);margin-top:8px}
 .tab{flex:1;border:0;border-bottom:3px solid transparent;background:transparent;padding:12px 8px;font-weight:700;cursor:pointer;color:var(--muted)}
 .tab.active{color:var(--fg);border-bottom-color:var(--brand)}
@@ -208,6 +208,7 @@ footer{margin-top:22px; color:var(--muted); font-size:.82rem}
     ['Compra protegida','O pagamento só é liberado à loja depois que você confirma o recebimento.'],
     ['Nota fiscal','Enviada junto com o produto e disponível no seu pedido.']
   ];
+  // foto de vitrine: aparece na galeria, não é um produto à venda
   var photoCozidos = {src:'fotos/ovos-cozidos.jpg', alt:'Ovos cozidos cortados ao meio com gema amarela', cap:'Sugestão de preparo: ovo cozido por 10 minutos, com a gema firme e amarela.'};
   var cookTip = 'Cozido por 10 minutos em água fervente, o ovo fica com a gema firme e amarela, como na última foto.';
 
@@ -275,6 +276,7 @@ footer{margin-top:22px; color:var(--muted); font-size:.82rem}
     p.variantLabel='Tipo de compra'; p.qtyLabel='Quantidade'; p.unit=['bandeja','bandejas']; p.maxQ=10;
   });
 
+  // datas (domingo não conta como dia útil)
   var today = new Date();
   function addBiz(d, n){
     var r = new Date(d);
@@ -290,10 +292,10 @@ footer{margin-top:22px; color:var(--muted); font-size:.82rem}
     return d.toLocaleDateString('pt-BR',{weekday:'short', day:'numeric', month:'short'}).replace('.,',',').replace(/\.$/,'');
   }
 
-  var cepVal = '13010000';
-  var app = $('app'), crumbs =$('crumbs');
+  var cepVal = '13010000'; // compartilhado entre os produtos
+  var app = $('app'), crumbs = $('crumbs');
 
-  // ---------- início com abas (Produtos / Informações de Envio)
+  // ---------- início
   function renderHome(){
     crumbs.innerHTML = '<b>Início</b>';
     var cards = products.map(function(p){
@@ -307,40 +309,11 @@ footer{margin-top:22px; color:var(--muted); font-size:.82rem}
         '<div class="cprice"><small>a partir de</small>'+brl(min)+'</div>'+
         '<div class="cship">'+p.shipHint+'</div></div></a>';
     }).join('');
-
-    var post = nextPost([1,2,3,4]);
-    var shipRows =
-      '<div><span>Enviado de</span><span>Campinas, SP</span></div>'+
-      '<div><span>Dias de postagem</span><span>segunda a quinta</span></div>'+
-      '<div><span>Próxima postagem</span><span>'+fmt(post)+'</span></div>'+
-      '<div><span>Frete grátis</span><span>em compras a partir de R$ 79,00</span></div>';
-
     app.innerHTML =
-      '<nav class="product-tabs" aria-label="Navegação Principal">'+
-        '<button type="button" class="tab active" data-home-tab="produtos" aria-selected="true">Produtos</button>'+
-        '<button type="button" class="tab" data-home-tab="envio" aria-selected="false">Informações de Envio</button>'+
-      '</nav>'+
-      '<div class="home-panel" id="panel-produtos">'+
-        '<section class="intro"><h1>Escolha o seu ovo</h1>'+
-        '<p>Toque em um produto para ver o preço, o frete para o seu CEP e a previsão de entrega.</p>'+
-        '<div class="perks"><span>Frete grátis a partir de R$ 79,00</span><span>Ovo quebrado a gente troca</span><span>Compra protegida</span></div></section>'+
-        '<div class="cards">'+cards+'</div>'+
-      '</div>'+
-      '<div class="home-panel" id="panel-envio" hidden>'+
-        '<section class="block" style="margin-top:20px"><div class="sec-head"><h2>Informações Gerais de Envio</h2><p>Entenda como funciona o nosso processo de entrega de ovos frescos.</p></div>'+
-          '<div class="ship-grid"><div><div class="origin">'+shipRows+'</div><div class="shipnote">'+shipNote+'</div></div>'+
-          '<div><label class="label">Regiões Atendidas</label><p style="margin-top:8px; font-size:.92rem; color:var(--muted)">'+unserved+'</p></div></div>'+
-        '</section>'+
-      '</div>';
-
-    document.querySelectorAll('[data-home-tab]').forEach(function(tab){
-      tab.addEventListener('click', function(){
-        document.querySelectorAll('[data-home-tab]').forEach(function(t){
-          var active = t===tab; t.classList.toggle('active',active); t.setAttribute('aria-selected',String(active));
-        });
-        document.querySelectorAll('.home-panel').forEach(function(panel){ panel.hidden = panel.id !== 'panel-'+tab.dataset.homeTab; });
-      });
-    });
+      '<section class="intro"><h1>Escolha o seu ovo</h1>'+
+      '<p>Toque em um produto para ver o preço, o frete para o seu CEP e a previsão de entrega.</p>'+
+      '<div class="perks"><span>Frete grátis a partir de R$ 79,00</span><span>Ovo quebrado a gente troca</span><span>Compra protegida</span></div></section>'+
+      '<div class="cards">'+cards+'</div>';
   }
 
   // ---------- produto
@@ -370,4 +343,180 @@ footer{margin-top:22px; color:var(--muted); font-size:.82rem}
         '<p class="label">The Egg · Loja oficial</p>'+
         '<h1>'+p.title+'</h1>'+
         '<div class="meta"><span><strong>'+p.rating+'</strong> ★★★★★ ('+p.reviews+' avaliações)</span><span><strong>'+p.sold+'</strong> vendidos</span></div>'+
-        '<div class="price"><span class="now mono" id="priceNow"></span><span class="old mono" id
+        '<div class="price"><span class="now mono" id="priceNow"></span><span class="old mono" id="priceOld"></span><span class="off" id="priceOff"></span><span class="inst" id="inst"></span></div>'+
+        '<div class="field"><span class="label">'+p.variantLabel+'</span><div class="chips" id="chips" role="group" aria-label="'+p.variantLabel+'"></div></div>'+
+        '<div class="field"><span class="label">'+p.qtyLabel+'</span><div class="qty"><div class="step">'+
+          '<button type="button" id="minus" aria-label="Diminuir quantidade">−</button><output id="qty" aria-live="polite">1</output>'+
+          '<button type="button" id="plus" aria-label="Aumentar quantidade">+</button></div><span class="stock" id="stock"></span></div></div>'+
+        '<div class="hint" id="freeHint"></div>'+
+        '<div class="cta"><button class="btn ghost" type="button" id="add">Adicionar ao carrinho</button><button class="btn solid" type="button" id="buyNow">Comprar agora</button></div>'+
+        '<div class="status" id="status" role="status"></div>'+
+      '</div></div>'+
+
+      '</div><nav class="product-tabs" aria-label="Informações do produto">'+
+        '<button type="button" class="tab active" data-tab="produto" aria-selected="true">Produto</button>'+
+        '<button type="button" class="tab" data-tab="envio" aria-selected="false">Envio</button>'+
+        '<button type="button" class="tab" data-tab="detalhes" aria-selected="false">Detalhes</button></nav>'+
+      '<div class="tab-panel" id="panel-envio" hidden>'+
+      '<section class="block"><div class="sec-head"><h2>Envio</h2><p>Prazo contado em dias úteis a partir da postagem.</p></div>'+
+        '<div class="ship-grid"><div><div class="origin">'+shipRows+'</div><div class="shipnote">'+p.shipNote+'</div></div>'+
+        '<div><label class="label" for="cep">Calcule o frete para o seu CEP</label>'+
+          '<form class="cep" id="cepForm" style="margin-top:8px" novalidate><input id="cep" inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000"><button type="submit">Calcular</button></form>'+
+          '<div class="err" id="cepErr" role="alert"></div><div class="opts" id="opts" role="radiogroup" aria-label="Opções de envio"></div></div></div></section>'+
+
+      '<section class="block"><div class="sec-head"><h2>Como o pedido chega até você</h2><p>Você acompanha cada etapa pelo código de rastreio.</p></div>'+
+        '<div class="code mono"><span class="label" style="letter-spacing:.06em">Código de exemplo</span> BR 5503 9921 47 SP</div>'+
+        '<ol class="track" id="track"></ol><p class="note" id="trackNote"></p></section>'+
+
+      '</div><div class="tab-panel" id="panel-detalhes" hidden>'+
+      '<section class="block"><div class="sec-head"><h2>Detalhes do produto</h2></div>'+
+        '<div class="cols"><div class="desc">'+descs+'<ul>'+bullets+'</ul></div><div class="tablewrap"><table>'+spec+'</table></div></div>'+
+        '<div class="policies">'+pols+'</div></section></div>';
+
+    document.querySelectorAll('.product-tabs .tab').forEach(function(tab){
+      tab.addEventListener('click', function(){
+        document.querySelectorAll('.product-tabs .tab').forEach(function(t){
+          var active = t===tab; t.classList.toggle('active',active); t.setAttribute('aria-selected',String(active));
+        });
+        document.querySelectorAll('.tab-panel').forEach(function(panel){ panel.hidden = panel.id !== 'panel-'+tab.dataset.tab; });
+        window.scrollTo({top:document.querySelector('.product-tabs').offsetTop-8,behavior:'smooth'});
+      });
+    });
+
+    var maxQty = function(){ return Math.min(p.maxQ, p.variants[cur].stock); };
+
+    function renderThumbs(){
+      var th = $('thumbs'); th.innerHTML='';
+      p.photos.forEach(function(f,i){
+        var b = document.createElement('button');
+        b.type='button'; b.className='thumb'; b.setAttribute('aria-pressed', i===photo);
+        b.setAttribute('aria-label','Foto '+(i+1)+' de '+p.photos.length);
+        b.innerHTML = '<img src="'+f.src+'" alt="">';
+        b.onclick = function(){photo=i; showPhoto();};
+        th.appendChild(b);
+      });
+    }
+    function showPhoto(){
+      var f = p.photos[photo];
+      $('mainImg').src = f.src; $('mainImg').alt = f.alt; $('cap').textContent = f.cap;
+      renderThumbs();
+    }
+    function renderChips(){
+      var ch = $('chips'); ch.innerHTML='';
+      p.variants.forEach(function(v,i){
+        var c = document.createElement('button');
+        c.type='button'; c.className='chip'; c.setAttribute('aria-pressed', i===cur);
+        c.innerHTML = '<b>'+v.name+'</b><small>'+v.sub+'</small>';
+        c.onclick = function(){cur=i; qty=Math.min(qty, maxQty()); renderBuy();};
+        ch.appendChild(c);
+      });
+    }
+    function renderBuy(){
+      var v = p.variants[cur], sub = v.price*qty, off = Math.round((1 - v.price/v.old)*100);
+      renderChips();
+      $('priceNow').textContent = brl(v.price);
+      $('priceOld').textContent = brl(v.old);
+      $('priceOff').textContent = '-'+off+'%';
+      $('inst').textContent = 'ou 2x de '+brl(v.price/2)+' sem juros';
+      $('qty').textContent = qty;
+      var s = v.stock, unitOne = v.unitName || p.unit[0], unitMany = v.unitPlural || p.unit[1];
+      $('stock').textContent = s<=10 ? 'Restam só '+s+' '+(s===1?unitOne:unitMany) : s+' '+unitMany+' disponíveis · máximo de '+p.maxQ+' por pedido';
+      $('minus').disabled = qty<=1; $('plus').disabled = qty>=maxQty();
+      $('pack').textContent = v.size+' · '+kgTxt(v.kg)+' cada';
+      if(sub >= FREE_FROM){
+        $('freeHint').textContent = 'Subtotal de '+brl(sub)+'. Esta compra tem frete grátis no envio padrão.';
+      } else {
+        var miss = FREE_FROM - sub, more = Math.ceil(miss / v.price);
+        $('freeHint').textContent = 'Subtotal de '+brl(sub)+'. Faltam '+brl(miss)+' para o frete grátis, ou seja, mais '+more+' '+(more===1?(v.unitName||p.unit[0]):(v.unitPlural||p.unit[1]))+'.';
+      }
+      renderShip();
+    }
+
+    // frete
+    function range(a,b){ return fmt(addBiz(post,a))+' a '+fmt(addBiz(post,b)); }
+    function buildOptions(){
+      var r = p.regions[cepVal.charAt(0)];
+      if(!r){ served=false; options=[]; return; }
+      served = true;
+      var v = p.variants[cur], free = v.price*qty >= FREE_FROM;
+      var extra = Math.max(0, Math.ceil(v.kg*qty) - 2) * 2.5;
+      options = [
+        {name:'Padrão', info:range(r.std[0], r.std[1]), price: free ? 0 : Math.max(8.9, r.fee-5+extra), days:r.std[1]},
+        {name:'Expresso', info:range(r.exp[0], r.exp[1]), price:r.fee+extra, days:r.exp[1]}
+      ];
+      if(chosen>=options.length) chosen = 0;
+    }
+    function renderShip(){
+      buildOptions();
+      var box = $('opts'); box.innerHTML='';
+      if(!served){
+        box.innerHTML = '<div class="nope"><b>Não entregamos neste CEP.</b> '+p.unserved+'</div>';
+        renderTrack(); return;
+      }
+      options.forEach(function(o,i){
+        var l = document.createElement('label'); l.className='opt';
+        l.innerHTML = '<input type="radio" name="ship" '+(i===chosen?'checked':'')+'>'+
+          '<span><b>'+o.name+'</b><small>Receba entre '+o.info+'</small></span>'+
+          '<span class="p'+(o.price===0?' free':'')+' mono">'+(o.price===0?'Grátis':brl(o.price))+'</span>';
+        l.querySelector('input').onchange = function(){chosen=i; renderTrack();};
+        box.appendChild(l);
+      });
+      renderTrack();
+    }
+    function renderTrack(){
+      var ol = $('track'); ol.innerHTML='';
+      if(!served){ $('trackNote').textContent = 'Informe um CEP atendido para ver a previsão de entrega.'; return; }
+      $('trackNote').textContent = 'As datas mostradas são uma previsão calculada para a opção de envio escolhida.';
+      var total = options[chosen].days;
+      var steps = [
+        ['Pedido confirmado','Hoje',true],
+        [p.trackStep, fmt(post), false],
+        ['Coletado pela transportadora', fmt(post), false],
+        ['Em trânsito', fmt(addBiz(post, Math.max(1, Math.round(total/2)))), false],
+        ['Saiu para entrega', fmt(addBiz(post, total)), false],
+        ['Entregue', fmt(addBiz(post, total)), false]
+      ];
+      steps.forEach(function(s){
+        var li = document.createElement('li'); if(s[2]) li.className='done';
+        li.innerHTML = '<b>'+s[0]+'</b><span>'+s[1]+'</span>';
+        ol.appendChild(li);
+      });
+    }
+
+    // eventos
+    $('minus').onclick = function(){ if(qty>1){qty--; renderBuy();} };
+    $('plus').onclick = function(){ if(qty<maxQty()){qty++; renderBuy();} };
+    function say(m){ $('status').textContent = m; }
+    $('add').onclick = function(){ var v=p.variants[cur]; say('Adicionado ao carrinho: '+qty+' × '+p.short+' ('+v.name+') por '+brl(v.price*qty)+'.'); };
+    $('buyNow').onclick = function(){ say('Seguindo para o pagamento de '+brl(p.variants[cur].price*qty)+'.'); };
+
+    var cepInput = $('cep');
+    cepInput.value = cepVal.length>5 ? cepVal.slice(0,5)+'-'+cepVal.slice(5) : cepVal;
+    cepInput.addEventListener('input', function(){
+      var d = cepInput.value.replace(/\D/g,'').slice(0,8);
+      cepInput.value = d.length>5 ? d.slice(0,5)+'-'+d.slice(5) : d;
+    });
+    $('cepForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      var d = cepInput.value.replace(/\D/g,'');
+      if(d.length!==8){ $('cepErr').textContent = 'Digite um CEP com 8 números, por exemplo 13010-000.'; return; }
+      $('cepErr').textContent = '';
+      cepVal = d; chosen = 0; renderShip();
+    });
+
+    showPhoto(); renderBuy();
+  }
+
+  // rotas por hash: #inicio ou #id-do-produto
+  function route(){
+    var id = (location.hash||'').replace('#','');
+    var p = products.filter(function(x){return x.id===id})[0];
+    if(p) renderProduct(p); else renderHome();
+    window.scrollTo(0,0);
+  }
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
+
+</body></html>
